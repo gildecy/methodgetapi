@@ -15,10 +15,8 @@ const formatDate = (date)=>{
           html += "<tr>";
           html += "<td>" + dados.data[index].pool_id+ "</td>";
           html += "<td>" + dados.data[index].nome+ "</td>";
-          html += "<td>" + dados.data[index].algicida+ "</td>";
-          html += "<td>" + dados.data[index].barrilha+ "</td>";
-          html += "<td>" + dados.data[index].clarificante+ "</td>";
-          html += "<td>" + dados.data[index].cloro+ "</td>";
+          html += "<td>" + dados.data[index].ph+ "</td>";
+         html += "<td>" + dados.data[index].cloro+ "</td>";          
           html += "<td>" + formatDate(dados.data[index].date)+ "</td>";
           html += "</tr>";
         }
