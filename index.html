@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -44,15 +45,23 @@
         <th>Nome</th>
         <th>pH</th>
         <th>Cloro</th>
-        <tr>Barrilha</tr>
+        <th>Data</th>
       </tr>
     </thead>
     <tbody id="dados-lista">
-      <tr><td colspan="3">Carregando...</td></tr>
+      <tr><td colspan="4">Carregando...</td></tr>
     </tbody>
   </table>
 
   <script>
+    // Função para formatar data no padrão brasileiro
+    function formatDate(date) {
+      if (!date) return "-";
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("pt-BR", { timeZone: "UTC" });
+    }
+
     async function carregarDados() {
       try {
         const response = await fetch("https://pool-api-alpha.vercel.app/api/v1/pool/");
@@ -63,7 +72,7 @@
         lista.innerHTML = ""; // limpa conteúdo
 
         if (!Array.isArray(dados.data) || dados.data.length === 0) {
-          lista.innerHTML = "<tr><td colspan='3'>Nenhum dado encontrado</td></tr>";
+          lista.innerHTML = "<tr><td colspan='4'>Nenhum dado encontrado</td></tr>";
           return;
         }
 
@@ -73,6 +82,7 @@
               <td>${item.nome ?? "-"}</td>
               <td>${item.ph ?? "-"}</td>
               <td>${item.cloro ?? "-"}</td>
+              <td>${formatDate(item.date)}</td>
             </tr>
           `;
           lista.innerHTML += row;
@@ -80,7 +90,7 @@
       } catch (erro) {
         console.error(erro);
         document.getElementById("dados-lista").innerHTML =
-          "<tr><td colspan='3'>Erro ao carregar dados</td></tr>";
+          "<tr><td colspan='4'>Erro ao carregar dados</td></tr>";
       }
     }
 
