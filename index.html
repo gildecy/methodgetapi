@@ -1,58 +1,90 @@
-// Função para escapar texto (evita XSS se os dados vierem de fora)
-function escapeHtml(str) {
-  if (str == null) return "-";
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tabela de Piscinas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e0f7fa;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #006064;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #ffffff;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background-color: #00838f;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
 
-const formatDate = (date) => {
-  if (!date) return "-"; // cobre null, undefined, "", 0, false
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return "-"; // data inválida
-  // Retorna formato dd/mm/aaaa (pt-BR). Remova timeZone se quiser hora local.
-  return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-}
+  <h1>Dados da Piscina</h1>
 
-async function fetchDados() {
-  try {
-    const response = await fetch('https://pool-api-alpha.vercel.app/api/v1/pool/');
-    if (!response.ok) throw new Error(`Erro HTTP ${response.status}`);
-    const dados = await response.json();
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>pH</th>
+        <th>Cloro</th>
+      </tr>
+    </thead>
+    <tbody id="dados-lista">
+      <tr><td colspan="3">Carregando...</td></tr>
+    </tbody>
+  </table>
 
-    const lista = document.getElementById('dados-lista');
-    if (!lista) {
-      console.warn("Elemento com id 'dados-lista' não encontrado no DOM.");
-      return;
+  <script>
+    async function carregarDados() {
+      try {
+        const response = await fetch("https://pool-api-alpha.vercel.app/api/v1/pool/");
+        if (!response.ok) throw new Error("Erro ao buscar dados: " + response.status);
+        
+        const dados = await response.json();
+        const lista = document.getElementById("dados-lista");
+        lista.innerHTML = ""; // limpa conteúdo
+
+        if (!Array.isArray(dados.data) || dados.data.length === 0) {
+          lista.innerHTML = "<tr><td colspan='3'>Nenhum dado encontrado</td></tr>";
+          return;
+        }
+
+        dados.data.forEach(item => {
+          const row = `
+            <tr>
+              <td>${item.nome ?? "-"}</td>
+              <td>${item.ph ?? "-"}</td>
+              <td>${item.cloro ?? "-"}</td>
+            </tr>
+          `;
+          lista.innerHTML += row;
+        });
+      } catch (erro) {
+        console.error(erro);
+        document.getElementById("dados-lista").innerHTML =
+          "<tr><td colspan='3'>Erro ao carregar dados</td></tr>";
+      }
     }
 
-    const items = Array.isArray(dados?.data) ? dados.data : [];
-    if (items.length === 0) {
-      lista.innerHTML = '<tr><td colspan="5">Sem dados</td></tr>';
-      return;
-    }
+    document.addEventListener("DOMContentLoaded", carregarDados);
+  </script>
 
-    const html = items.map(item => {
-      return `<tr>
-        <td>${escapeHtml(item.pool_id ?? "-")}</td>
-        <td>${escapeHtml(item.nome ?? "-")}</td>
-        <td>${escapeHtml(item.ph ?? "-")}</td>
-        <td>${escapeHtml(item.cloro ?? "-")}</td>
-        <td>${escapeHtml(formatDate(item.date))}</td>
-      </tr>`;
-    }).join('');
-
-    lista.innerHTML = html;
-
-  } catch (error) {
-    console.error('Erro ao buscar dados:', error);
-    // opcional: mostrar mensagem no HTML
-    const lista = document.getElementById('dados-lista');
-    if (lista) lista.innerHTML = '<tr><td colspan="5">Erro ao carregar dados</td></tr>';
-  }
-}
-
-document.addEventListener('DOMContentLoaded', fetchDados);
+</body>
+</html>
