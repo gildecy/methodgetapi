@@ -5,28 +5,32 @@ const formatDate = (date)=>{
   }
   
   async function fetchDados() {
-      try {
-        const response = await fetch('https://pool-api-alpha.vercel.app/api/v1/pool/');
-        const dados = await response.json();
-        const lista = document.getElementById('dados-lista');
-        console.log(dados.data)
-        let html = ""
-        for (let index = 0; index < dados.data.length; index++) {
-          html += "<tr>";
-          html += "<td>" + dados.data[index].pool_id+ "</td>";
-          html += "<td>" + dados.data[index].nome+ "</td>";
-          html += "<td>" + dados.data[index].ph+ "</td>";
-         html += "<td>" + dados.data[index].cloro+ "</td>"; 
-        
-          html += "<td>" + formatDate(dados.data[index].date)+ "</td>";
-          html += "</tr>";
-        }
-  
-        lista.innerHTML = html;
-  
-      } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-      }
+  try {
+    const response = await fetch('https://pool-api-alpha.vercel.app/api/v1/pool/');
+    const dados = await response.json();
+    const lista = document.getElementById('dados-lista');
+    console.log(dados.data);
+
+    if (!Array.isArray(dados.data) || dados.data.length === 0) {
+      lista.innerHTML = "<tr><td colspan='5'>Nenhum dado encontrado</td></tr>";
+      return;
     }
-    
-    document.addEventListener('DOMContentLoaded', fetchDados);
+
+    const html = dados.data.map(item => `
+      <tr>
+        <td>${item.pool_id ?? "-"}</td>
+        <td>${item.nome ?? "-"}</td>
+        <td>${item.ph ?? "-"}</td>
+        <td>${item.cloro ?? "-"}</td>
+        <td>${formatDate(item.date)}</td>
+      </tr>
+    `).join("");
+
+    lista.innerHTML = html;
+
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+    document.getElementById("dados-lista").innerHTML =
+      "<tr><td colspan='5'>Erro ao carregar dados</td></tr>";
+  }
+}
