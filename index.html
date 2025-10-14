@@ -34,54 +34,76 @@
   </div>
 
   <script>
-    const API_URL = 'https://pool-api-alpha.vercel.app/api/v1/pool/'; // ajuste para sua API
+   // 1. DEFINIÇÃO DA URL DA API (adicione a sua URL aqui)
+const API_URL = 'https://pool-api-alpha.vercel.app/api/v1/pool/'; // Exemplo de URL
 
-    function escapeHtml(text) {
-      if (text == null) return '';
-      return String(text)
+/**
+ * 3. FUNÇÃO DE SEGURANÇA (para evitar injeção de HTML)
+ * Esta função converte caracteres especiais de HTML em suas entidades,
+ * impedindo que um texto malicioso seja interpretado como código.
+ */
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-    }
+}
 
-    function renderTable(data) {
-      const tbody = document.getElementById('table-body');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3">Nenhum registro encontrado.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.map(row => `
-        <tr>
-          <td>${escapeHtml(row.nome ?? '')}</td>
-          <td>${row.ph != null ? Number(row.ph).toFixed(2) : '-'}</td>
-          <td>${row.cloro != null ? Number(row.cloro).toFixed(2) : '-'}</td>
-        </tr>
-      `).join('');
-    }
+// 2. CORREÇÃO DE "sync" PARA "async"
+async function fetchData() {
+    const status = document.getElementById('status');
+    const tableBody = document.getElementById('table-body');
+    status.textContent = 'Carregando...';
 
-    async function fetchData() {
-      const status = document.getElementById('status');
-      status.textContent = 'Carregando...';
-      try {
+    try {
         const res = await fetch('https://pool-api-alpha.vercel.app/api/v1/pool/');
         if (!res.ok) throw new Error('Resposta HTTP ' + res.status);
+        
         const json = await res.json();
         // exemplo de retorno esperado: { "msg":"OK", "data":[ {nome, ph, cloro}, ... ] }
         console.log('API response', json);
-        if (json.msg && json.msg !== 'OK') throw new Error(json.msg || 'Erro da API');
-        renderTable(json.data || []);
-        status.textContent = (json.data && json.data.length) ? '' : 'Nenhum registro';
-      } catch (err) {
+        
+        if (json.msg && json.msg !== 'OK') throw new Error(json.msg || 'Erro retornado pela API');
+
+        // Supondo que você tenha uma função renderTable para desenhar a tabela
+        renderTable(json.data || []); 
+        
+        status.textContent = (json.data && json.data.length > 0) ? '' : 'Nenhum registro encontrado';
+
+    } catch (err) {
         console.error(err);
-        document.getElementById('table-body').innerHTML = `<tr><td colspan="3">Erro ao carregar: ${escapeHtml(err.message)}</td></tr>`;
-        status.textContent = 'Erro';
-      }
+        // Usando a função escapeHtml para exibir a mensagem de erro com segurança
+        tableBody.innerHTML = `<tr><td colspan="3">Erro ao carregar: ${escapeHtml(err.message)}</td></tr>`;
+        status.textContent = 'Erro ao carregar';
+    }
+}
+
+// Você também precisará da função renderTable, que não estava no seu código original.
+// Exemplo de como ela poderia ser:
+function renderTable(data) {
+    const tableBody = document.getElementById('table-body');
+    if (!data || data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3">Nenhum registro encontrado</td></tr>';
+        return;
     }
 
-    document.getElementById('refreshBtn').addEventListener('click', fetchData);
-    document.addEventListener('DOMContentLoaded', fetchData);
+    const rows = data.map(item => `
+        <tr>
+            <td>${escapeHtml(item.nome || '-')}</td>
+            <td>${escapeHtml(item.ph || '-')}</td>
+            <td>${escapeHtml(item.cloro || '-')}</td>
+        </tr>
+    `).join('');
+
+    tableBody.innerHTML = rows;
+}
+
+
+// Para iniciar o processo, você chamaria a função:
+fetchData();
   </script>
 </body>
 </html>
