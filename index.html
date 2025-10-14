@@ -65,7 +65,7 @@
       const status = document.getElementById('status');
       status.textContent = 'Carregando...';
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch('https://pool-api-alpha.vercel.app/api/v1/pool/');
         if (!res.ok) throw new Error('Resposta HTTP ' + res.status);
         const json = await res.json();
         // exemplo de retorno esperado: { "msg":"OK", "data":[ {nome, ph, cloro}, ... ] }
