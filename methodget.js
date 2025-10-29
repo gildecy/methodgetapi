@@ -16,7 +16,7 @@ const pool = new Pool({
 
 module.exports = pool;
 
-// server.js seridor para comunicar com o banco de dados
+// server.js servidor para comunicar com o banco de dados
 const express = require('express');
 const cors = require('cors');
 const pool = require('https://pool-api-alpha.vercel.app/api/v1/pool/');
