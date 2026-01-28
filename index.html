@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -13,11 +14,11 @@
             font-family: 'Montserrat', sans-serif;
             background-color: #f4f4f9;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         .container {
@@ -27,38 +28,31 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
+            margin-bottom: 2rem;
         }
 
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 1.5rem;
+        .container-table {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
         }
 
-        form {
-            display: flex;
-            flex-direction: column;
-        }
+        h2 { text-align: center; color: #333; margin-bottom: 1.5rem; }
 
-        label {
-            margin-bottom: 0.5rem;
-            color: #555;
-            font-weight: 600;
-        }
+        form { display: flex; flex-direction: column; }
 
-        input[type="text"],
-        input[type="file"] {
+        label { margin-bottom: 0.5rem; color: #555; font-weight: 600; }
+
+        input[type="text"], input[type="date"] {
             padding: 0.75rem;
             margin-bottom: 1rem;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
-        }
-
-        input[type="text"]:focus,
-        input[type="file"]:focus {
-            border-color: #007bff;
-            outline: none;
+            font-family: 'Montserrat', sans-serif;
         }
 
         button {
@@ -72,18 +66,10 @@
             transition: background-color 0.3s ease;
         }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+        button:hover { background-color: #0056b3; }
 
-        .file-upload {
-            margin-bottom: 1rem;
-        }
-
-        .file-upload input[type="file"] {
-            display: none;
-        }
-
+        .file-upload { margin-bottom: 1rem; }
+        .file-upload input[type="file"] { display: none; }
         .file-upload label {
             display: block;
             padding: 0.75rem;
@@ -96,13 +82,16 @@
             font-weight: 600;
         }
 
-        .file-upload label:hover {
-            background-color: #e9ecef;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        img { border-radius: 4px; object-fit: cover; }
     </style>
 </head>
 
 <body>
+
     <div class="container">
         <h2>Registro de Piscina</h2>
         <form id="poolForm">
@@ -112,112 +101,91 @@
             <label for="cloro">Dicloro quantidade:</label>
             <input type="text" id="cloro" name="cloro" required>
 
-            <label for="ph">carbonato de sódio quantidade:</label>
+            <label for="ph">Carbonato de sódio:</label>
             <input type="text" id="ph" name="ph" required>
 
             <div class="file-upload">
-                <label for="fotos">Upload de Fotos</label>
+                <label for="fotos">📸 Upload de Fotos</label>
                 <input type="file" id="fotos" name="fotos">
             </div>
 
-             <label for="data">Data do Registro:</label>
-    <input type="date" id="data" name="data" required>
+            <label for="data">Data do Registro:</label>
+            <input type="date" id="data" name="data" required>
 
             <button type="submit">Registrar</button>
         </form>
-        
-            <div class="container" style="max-width: 800px; margin-top: 2rem;">
-    <h2>Registros Salvos</h2>
-    <table id="poolTable" style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="background-color: #007bff; color: white;">
-                <th style="padding: 10px; border: 1px solid #ddd;">Data</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Nome</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Cloro</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">pH</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Foto</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            </tbody>
-    </table>
-</div>
-    
-        
-        
+    </div>
+
+    <div class="container-table">
+        <h2>Registros Salvos</h2>
+        <table id="poolTable">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Nome</th>
+                    <th>Cloro</th>
+                    <th>pH</th>
+                    <th>Foto</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+    </div>
 
     <script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Selecionamos o formulário pelo ID
-        const form = document.getElementById('poolForm');
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('poolForm');
 
-        form.addEventListener('submit', function (event) {
-            event.preventDefault(); // Impede a página de recarregar
+            // 1. Função para carregar dados da API
+            function carregarDados() {
+                fetch('https://pool-api-alpha.vercel.app/api/v1/pool/')
+                    .then(response => response.json())
+                    .then(dados => {
+                        const tbody = document.getElementById('tableBody');
+                        tbody.innerHTML = ''; 
 
-            // --- AQUI ESTÁ A SOLUÇÃO DA PARTE 2 ---
-            // O FormData captura TUDO: nome, cloro, ph, data e o arquivo de FOTO
-            const formData = new FormData(form);
+                        dados.forEach(item => {
+                            const linha = document.createElement('tr');
+                            linha.innerHTML = `
+                                <td>${item.data || '-'}</td>
+                                <td>${item.nome}</td>
+                                <td>${item.cloro}</td>
+                                <td>${item.ph}</td>
+                                <td>
+                                    ${item.fotos ? `<img src="${item.fotos}" width="60" height="60">` : 'N/A'}
+                                </td>
+                            `;
+                            tbody.appendChild(linha);
+                        });
+                    })
+                    .catch(error => console.error('Erro ao buscar dados:', error));
+            }
 
-            // Enviando para a API
-            fetch('https://pool-api-alpha.vercel.app/api/v1/pool/', {
-                method: 'POST',
-                // IMPORTANTE: Quando usamos FormData, NÃO colocamos 'Content-Type' no header.
-                // O navegador preenche isso automaticamente para nós.
-                body: formData 
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro na resposta do servidor');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Sucesso:', data);
-                alert('Registro e foto enviados com sucesso!');
-                form.reset(); // Limpa o formulário
-            })
-            .catch((error) => {
-                console.error('Erro:', error);
-                alert('Erro ao enviar: verifique se a API aceita arquivos.');
+            // 2. Evento de envio do formulário
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                const formData = new FormData(form);
+
+                fetch('https://pool-api-alpha.vercel.app/api/v1/pool/', {
+                    method: 'POST',
+                    body: formData 
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro no servidor');
+                    return response.json();
+                })
+                .then(data => {
+                    alert('Sucesso!');
+                    form.reset();
+                    carregarDados(); // Atualiza a tabela na hora!
+                })
+                .catch(error => alert('Erro ao enviar dados.'));
             });
+
+            // Carrega a tabela assim que abrir a página
+            carregarDados();
         });
-    });
-
-        function carregarDados() {
-    fetch('https://pool-api-alpha.vercel.app/api/v1/pool/')
-        .then(response => response.json())
-        .then(dados => {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = ''; // Limpa a tabela antes de preencher
-
-            dados.forEach(item => {
-                const linha = document.createElement('tr');
-                
-                // Criando as células (ajuste os nomes 'item.nome' conforme sua API retornar)
-                linha.innerHTML = `
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.data || '-'}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${item.nome}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.cloro}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.ph}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
-                        ${item.fotos ? `<img src="${item.fotos}" width="50">` : 'Sem foto'}
-                    </td>
-                `;
-                tbody.appendChild(linha);
-            });
-        })
-        .catch(error => console.error('Erro ao buscar dados:', error));
-}
-
-// Chame a função ao carregar a página
-document.addEventListener('DOMContentLoaded', carregarDados);
-</script>
-        
-       
     </script>
-    
 </body>
-
 </html>
-
