@@ -125,6 +125,22 @@
 
             <button type="submit">Registrar</button>
         </form>
+        <div class="container" style="max-width: 800px; margin-top: 2rem;">
+    <h2>Registros Salvos</h2>
+    <table id="poolTable" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #007bff; color: white;">
+                <th style="padding: 10px; border: 1px solid #ddd;">Data</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Nome</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Cloro</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">pH</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Foto</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+</div>
     </div>
 
     <script>
@@ -164,6 +180,35 @@
             });
         });
     });
+
+        function carregarDados() {
+    fetch('https://pool-api-alpha.vercel.app/api/v1/pool/')
+        .then(response => response.json())
+        .then(dados => {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ''; // Limpa a tabela antes de preencher
+
+            dados.forEach(item => {
+                const linha = document.createElement('tr');
+                
+                // Criando as células (ajuste os nomes 'item.nome' conforme sua API retornar)
+                linha.innerHTML = `
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.data || '-'}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${item.nome}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.cloro}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.ph}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                        ${item.fotos ? `<img src="${item.fotos}" width="50">` : 'Sem foto'}
+                    </td>
+                `;
+                tbody.appendChild(linha);
+            });
+        })
+        .catch(error => console.error('Erro ao buscar dados:', error));
+}
+
+// Chame a função ao carregar a página
+document.addEventListener('DOMContentLoaded', carregarDados);
 </script>
         
        
