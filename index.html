@@ -136,8 +136,11 @@
                     nome: document.querySelector('#nome').value,
                     cloro: document.querySelector('#cloro').value,
                     ph: document.querySelector('#ph').value,
+                    data:document.querySelector('#data').value,
                     
                 };
+                //Nota: O campo de fotos não será enviado via JSON aqui.
+                //Se a API não aceitar JSON você deve usar new FormData(this) 
 
                 fetch('https://pool-api-alpha.vercel.app/api/v1/pool/', {
                     method: 'POST',
