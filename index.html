@@ -128,39 +128,45 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('poolForm').addEventListener('submit', function (event) {
-                event.preventDefault();
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Selecionamos o formulário pelo ID
+        const form = document.getElementById('poolForm');
 
-                const formData = {
-                    nome: document.querySelector('#nome').value,
-                    cloro: document.querySelector('#cloro').value,
-                    ph: document.querySelector('#ph').value,
-                    data:document.querySelector('#data').value,
-                    
-                };
-                //Nota: O campo de fotos não será enviado via JSON aqui.
-                //Se a API não aceitar JSON você deve usar new FormData(this) 
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Impede a página de recarregar
 
-                fetch('https://pool-api-alpha.vercel.app/api/v1/pool/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Success:', data);
-                        alert('Formulário enviado com sucesso!');
-                        document.getElementById('poolForm').reset();
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        alert('Ocorreu um erro ao enviar o formulário.');
-                    });
+            // --- AQUI ESTÁ A SOLUÇÃO DA PARTE 2 ---
+            // O FormData captura TUDO: nome, cloro, ph, data e o arquivo de FOTO
+            const formData = new FormData(form);
+
+            // Enviando para a API
+            fetch('https://pool-api-alpha.vercel.app/api/v1/pool/', {
+                method: 'POST',
+                // IMPORTANTE: Quando usamos FormData, NÃO colocamos 'Content-Type' no header.
+                // O navegador preenche isso automaticamente para nós.
+                body: formData 
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na resposta do servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Sucesso:', data);
+                alert('Registro e foto enviados com sucesso!');
+                form.reset(); // Limpa o formulário
+            })
+            .catch((error) => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar: verifique se a API aceita arquivos.');
             });
         });
+    });
+</script>
+        
+       
     </script>
     
 </body>
