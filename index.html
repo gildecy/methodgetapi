@@ -119,33 +119,7 @@
     
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('poolForm');
-
-            // 1. Função para carregar dados da API
-            function carregarDados() {
-                fetch('https://pool-api-alpha.vercel.app/api/v1/pool/')
-                    .then(response => response.json())
-                    .then(dados => {
-                        const tbody = document.getElementById('tableBody');
-                        tbody.innerHTML = ''; 
-
-                        dados.forEach(item => {
-                            const linha = document.createElement('tr');
-                            linha.innerHTML = `
-                                <td>${item.data || '-'}</td>
-                                <td>${item.nome}</td>
-                                <td>${item.cloro}</td>
-                                <td>${item.ph}</td>
-                                <td>
-                                    ${item.fotos ? `<img src="${item.fotos}" width="60" height="60">` : 'N/A'}
-                                </td>
-                            `;
-                            tbody.appendChild(linha);
-                        });
-                    })
-                    .catch(error => console.error('Erro ao buscar dados:', error));
-            }
+    
 
             // 2. Evento de envio do formulário
             form.addEventListener('submit', function (event) {
